@@ -35,7 +35,7 @@ fun PlayerScreen(
     onBackClick: () -> Unit
 ) {
     val currentSong = viewModel.currentSong ?: return
-
+    val isFavorite = viewModel.isFavorite(currentSong)
     // Intercept system back gesture/button to call onBackClick instead of exiting the app
     BackHandler {
         onBackClick()
@@ -94,13 +94,7 @@ fun PlayerScreen(
                         letterSpacing = 2.sp,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                     )
-                    IconButton(onClick = {}) {
-                        Icon(
-                            imageVector = Icons.Default.FavoriteBorder,
-                            contentDescription = "Add to favorites",
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                        )
-                    }
+
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
@@ -187,16 +181,13 @@ fun PlayerScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Shuffle Toggle
-                    IconButton(onClick = { viewModel.toggleShuffle() }) {
+                    IconButton(onClick = {
+                        viewModel.toggleFavorite(currentSong)
+                    }) {
                         Icon(
-                            imageVector = Icons.Rounded.Shuffle,
-                            contentDescription = "Shuffle",
-                            tint = if (viewModel.isShuffleEnabled)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f),
-                            modifier = Modifier.size(28.dp)
+                            imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                            tint = if (isFavorite) Color(0xFFE91E63) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         )
                     }
 
