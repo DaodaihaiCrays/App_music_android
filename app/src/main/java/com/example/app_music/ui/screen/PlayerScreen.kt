@@ -94,11 +94,11 @@ fun PlayerScreen(
                         letterSpacing = 2.sp,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                     )
-                    IconButton(onClick = { /* More options */ }) {
+                    IconButton(onClick = {}) {
                         Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "Options",
-                            tint = MaterialTheme.colorScheme.onBackground
+                            imageVector = Icons.Default.FavoriteBorder,
+                            contentDescription = "Add to favorites",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         )
                     }
                 }
