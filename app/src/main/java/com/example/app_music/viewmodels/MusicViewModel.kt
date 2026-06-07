@@ -36,6 +36,8 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     // Search State
     var searchQuery by mutableStateOf("")
         private set
+    var showFavoritesOnly by mutableStateOf(false)
+        private set
 
     // Playback Modes
     var isShuffleEnabled by mutableStateOf(false)
@@ -44,12 +46,20 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     enum class RepeatMode { NONE, ALL, ONE }
 
     val filteredSongs: List<Song>
-        get() = if (searchQuery.isEmpty()) {
-            songs
-        } else {
-            songs.filter {
-                it.title.contains(searchQuery, ignoreCase = true) ||
+        get() {
+            val visibleSongs = if (showFavoritesOnly) {
+                songs.filter { it.id in favoriteSongIds }
+            } else {
+                songs
+            }
+
+            return if (searchQuery.isEmpty()) {
+                visibleSongs
+            } else {
+                visibleSongs.filter {
+                    it.title.contains(searchQuery, ignoreCase = true) ||
                         it.artist.contains(searchQuery, ignoreCase = true)
+                }
             }
         }
 
@@ -143,6 +153,10 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onSearchQueryChange(newQuery: String) {
         searchQuery = newQuery
+    }
+
+    fun updateShowFavoritesOnly(showFavoritesOnly: Boolean) {
+        this.showFavoritesOnly = showFavoritesOnly
     }
 
     fun play(song: Song) {

@@ -40,6 +40,7 @@ fun HomeScreen(
     val context = LocalContext.current
     var isPlayerScreenVisible by remember { mutableStateOf(false) }
     var isSearching by remember { mutableStateOf(false) }
+    var isMoreMenuExpanded by remember { mutableStateOf(false) }
     val mediaPermissions = remember {
         buildList {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -133,10 +134,29 @@ fun HomeScreen(
                         }
 
                         if (!isSearching) {
-                            IconButton(onClick = { /* TODO: Show Settings/More */ }) {
+                            IconButton(onClick = { isMoreMenuExpanded = true }) {
                                 Icon(
                                     imageVector = Icons.Default.MoreVert,
                                     contentDescription = "More Options"
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = isMoreMenuExpanded,
+                                onDismissRequest = { isMoreMenuExpanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Show tất cả bài hát") },
+                                    onClick = {
+                                        viewModel.updateShowFavoritesOnly(false)
+                                        isMoreMenuExpanded = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Show bài hát yêu thích") },
+                                    onClick = {
+                                        viewModel.updateShowFavoritesOnly(true)
+                                        isMoreMenuExpanded = false
+                                    }
                                 )
                             }
                         }
