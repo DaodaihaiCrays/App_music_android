@@ -145,14 +145,14 @@ fun HomeScreen(
                                 onDismissRequest = { isMoreMenuExpanded = false }
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Show tất cả bài hát") },
+                                    text = { Text("Danh sách tất cả bài hát") },
                                     onClick = {
                                         viewModel.updateShowFavoritesOnly(false)
                                         isMoreMenuExpanded = false
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Show bài hát yêu thích") },
+                                    text = { Text("Danh sách bài hát yêu thích") },
                                     onClick = {
                                         viewModel.updateShowFavoritesOnly(true)
                                         isMoreMenuExpanded = false
