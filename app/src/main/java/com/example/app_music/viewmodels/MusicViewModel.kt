@@ -118,14 +118,14 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                 controller = builtController
 
                 // Sync initial state from the service's player
-                controller?.let { player ->
+                controller?.let { mediaController ->
                     // Sync the song immediately on connect.
                     updateCurrentSongFromController()
-                    isPlaying = player.isPlaying
-                    isShuffleEnabled = player.shuffleModeEnabled
+                    isPlaying = mediaController.isPlaying
+                    isShuffleEnabled = mediaController.shuffleModeEnabled
 
                     // Keep UI state in sync with playback changes.
-                    player.addListener(object : Player.Listener {
+                    mediaController.addListener(object : Player.Listener {
                         override fun onIsPlayingChanged(playing: Boolean) {
                             isPlaying = playing
                         }
@@ -135,14 +135,14 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                         }
                         override fun onPlaybackStateChanged(playbackState: Int) {
                             if (playbackState == Player.STATE_READY) {
-                                duration = player.duration
+                                duration = mediaController.duration
                             }
                         }
                     })
 
                     pendingSongToPlay?.let { song ->
                         pendingSongToPlay = null
-                        startPlayback(song, player)
+                        startPlayback(song, mediaController)
                     }
                 }
             }.onFailure { throwable ->

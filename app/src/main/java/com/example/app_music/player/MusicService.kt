@@ -7,6 +7,7 @@ import androidx.media3.session.MediaSessionService
 
 class MusicService: MediaSessionService() {
 
+    // De lam viec voi Android system, Android system không giao tiep truc tiep voi expo
     private var mediaSession: MediaSession? = null
     private lateinit var player: ExoPlayer
 
