@@ -34,7 +34,7 @@ fun MiniPlayer(
     modifier: Modifier = Modifier
 ) {
     // FIXED: Use Unit as key and check isActive to keep the progress updated reliably
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel.isPlaying) {
         while (isActive) {
             viewModel.updateProgress()
             // Polling every 500ms for smoother progress bar and faster icon response

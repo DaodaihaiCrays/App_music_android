@@ -36,6 +36,10 @@ class MusicService: MediaSessionService() {
 
     override fun onUpdateNotification(session: MediaSession, startInForegroundRequired: Boolean) {
         // Essential for letting the system manage the foreground state
+//        false: Service không còn chạy foreground, Android có thể giữ nó thêm một lúc hoặc tự hủy khi cần RAM/tài nguyên. Không phải false là xóa ngay.
+//        true: Service chạy foreground nên được ưu tiên giữ sống cao hơn, thường dùng khi nhạc đang phát nền.
+
+
         super.onUpdateNotification(session, startInForegroundRequired)
     }
 
@@ -48,3 +52,10 @@ class MusicService: MediaSessionService() {
         super.onDestroy()
     }
 }
+
+/**
+SessionToken = địa chỉ của MusicService/MediaSession
+MediaController = điều khiển từ xa
+MediaSession = bộ phận tiếp nhận lệnh
+ExoPlayer = thiết bị thực sự phát nhạc
+ **/

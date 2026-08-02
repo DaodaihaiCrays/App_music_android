@@ -41,7 +41,7 @@ fun PlayerScreen(
         onBackClick()
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(viewModel.isPlaying) {
         while (isActive) {
             viewModel.updateProgress()
             delay(1000)

@@ -188,6 +188,8 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         val index = songs.indexOf(song)
         if (index == -1) return
 
+        // Khi đã setMediaItems rồi thì toàn bộ danh sách bài hát đã được đưa vào ExoPlayer nằm trong MusicService
+        // -> noti ở background vẫn biết bài hát tiếp theo hoặc trước đó
         player.setMediaItems(mediaItems, index, 0L)
         player.prepare()
         player.play()
