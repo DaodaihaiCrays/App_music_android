@@ -30,6 +30,8 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     var currentSong by mutableStateOf<Song?>(null)
     var currentPosition by mutableLongStateOf(0L)
     var duration by mutableLongStateOf(0L)
+    var volume by mutableStateOf(1f)
+        private set
     var favoriteSongIds by mutableStateOf(emptySet<Long>())
         private set
 
@@ -123,6 +125,7 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                     updateCurrentSongFromController()
                     isPlaying = mediaController.isPlaying
                     isShuffleEnabled = mediaController.shuffleModeEnabled
+                    volume = mediaController.volume
 
                     // Keep UI state in sync with playback changes.
                     mediaController.addListener(object : Player.Listener {
@@ -137,6 +140,9 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                             if (playbackState == Player.STATE_READY) {
                                 duration = mediaController.duration
                             }
+                        }
+                        override fun onVolumeChanged(newVolume: Float) {
+                            volume = newVolume
                         }
                     })
 
@@ -231,6 +237,11 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     fun seekTo(position: Long) {
         controller?.seekTo(position)
         currentPosition = position
+    }
+
+    fun updateVolume(value: Float) {
+        controller?.volume = value
+        volume = value
     }
 
     fun toggleShuffle() {

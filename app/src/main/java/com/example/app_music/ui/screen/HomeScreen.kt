@@ -14,15 +14,22 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.app_music.ui.theme.NeonGreen
 import com.example.app_music.ui.components.MiniPlayer
 import com.example.app_music.ui.components.SongList
 import com.example.app_music.viewmodels.MusicViewModel
@@ -193,6 +200,42 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxSize()
                 )
             }
+        }
+
+        // Thanh tăng giảm âm lượng bên phải màn hình
+        Box(
+            modifier = Modifier
+                .fillMaxHeight(0.3f)
+                .align(Alignment.CenterEnd)
+                .width(40.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Slider(
+                value = viewModel.volume,
+                onValueChange = { viewModel.updateVolume(it) },
+                valueRange = 0f..1f,
+                modifier = Modifier
+                    .rotate(-90f)
+                    .layout { measurable, constraints ->
+                        val placeable = measurable.measure(
+                            Constraints(
+                                minWidth = constraints.minHeight,
+                                maxWidth = constraints.maxHeight,
+                                minHeight = constraints.minWidth,
+                                maxHeight = constraints.maxWidth,
+                            )
+                        )
+                        layout(placeable.height, placeable.width) {
+                            placeable.place(-((placeable.width - placeable.height) / 2), -((placeable.height - placeable.width) / 2))
+                        }
+                    }
+                    .fillMaxHeight(0.3f),
+                colors = SliderDefaults.colors(
+                    thumbColor = NeonGreen,
+                    activeTrackColor = NeonGreen,
+                    inactiveTrackColor = Color.Gray.copy(alpha = 0.3f)
+                )
+            )
         }
 
         if (isPlayerScreenVisible) {
