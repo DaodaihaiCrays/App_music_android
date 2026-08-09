@@ -6,7 +6,11 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -18,12 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -33,6 +36,7 @@ import com.example.app_music.ui.theme.NeonGreen
 import com.example.app_music.ui.components.MiniPlayer
 import com.example.app_music.ui.components.SongList
 import com.example.app_music.viewmodels.MusicViewModel
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +52,16 @@ fun HomeScreen(
     var isPlayerScreenVisible by remember { mutableStateOf(false) }
     var isSearching by remember { mutableStateOf(false) }
     var isMoreMenuExpanded by remember { mutableStateOf(false) }
+    var isVolumeSliderVisible by remember { mutableStateOf(false) }
+    var volumeInteractionKey by remember { mutableIntStateOf(0) }
+
+    // Tự động ẩn Slider sau 3 giây
+    LaunchedEffect(volumeInteractionKey) {
+        if (isVolumeSliderVisible) {
+            delay(3000)
+            isVolumeSliderVisible = false
+        }
+    }
     val mediaPermissions = remember {
         buildList {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -207,35 +221,52 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxHeight(0.3f)
                 .align(Alignment.CenterEnd)
-                .width(40.dp),
+                .width(50.dp) // Vùng nhận diện long press
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onLongPress = {
+                            isVolumeSliderVisible = true
+                            volumeInteractionKey++
+                        }
+                    )
+                },
             contentAlignment = Alignment.Center
         ) {
-            Slider(
-                value = viewModel.volume,
-                onValueChange = { viewModel.updateVolume(it) },
-                valueRange = 0f..1f,
-                modifier = Modifier
-                    .rotate(-90f)
-                    .layout { measurable, constraints ->
-                        val placeable = measurable.measure(
-                            Constraints(
-                                minWidth = constraints.minHeight,
-                                maxWidth = constraints.maxHeight,
-                                minHeight = constraints.minWidth,
-                                maxHeight = constraints.maxWidth,
+            AnimatedVisibility(
+                visible = isVolumeSliderVisible,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Slider(
+                    value = viewModel.volume,
+                    onValueChange = {
+                        viewModel.updateVolume(it)
+                        volumeInteractionKey++ // Reset bộ đếm 3 giây khi đang trượt
+                    },
+                    valueRange = 0f..1f,
+                    modifier = Modifier
+                        .rotate(-90f)
+                        .layout { measurable, constraints ->
+                            val placeable = measurable.measure(
+                                Constraints(
+                                    minWidth = constraints.minHeight,
+                                    maxWidth = constraints.maxHeight,
+                                    minHeight = constraints.minWidth,
+                                    maxHeight = constraints.maxWidth,
+                                )
                             )
-                        )
-                        layout(placeable.height, placeable.width) {
-                            placeable.place(-((placeable.width - placeable.height) / 2), -((placeable.height - placeable.width) / 2))
+                            layout(placeable.height, placeable.width) {
+                                placeable.place(-((placeable.width - placeable.height) / 2), -((placeable.height - placeable.width) / 2))
+                            }
                         }
-                    }
-                    .fillMaxHeight(0.3f),
-                colors = SliderDefaults.colors(
-                    thumbColor = NeonGreen,
-                    activeTrackColor = NeonGreen,
-                    inactiveTrackColor = Color.Gray.copy(alpha = 0.3f)
+                        .fillMaxHeight(0.6f),
+                    colors = SliderDefaults.colors(
+                        thumbColor = NeonGreen,
+                        activeTrackColor = NeonGreen,
+                        inactiveTrackColor = Color.Gray.copy(alpha = 0.3f)
+                    )
                 )
-            )
+            }
         }
 
         if (isPlayerScreenVisible) {
