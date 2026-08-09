@@ -2,7 +2,11 @@ package com.example.app_music.ui.screen
 
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,14 +21,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.app_music.ui.theme.NeonGreen
 import com.example.app_music.viewmodels.MusicViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -36,6 +45,17 @@ fun PlayerScreen(
 ) {
     val currentSong = viewModel.currentSong ?: return
     val isFavorite = viewModel.isFavorite(currentSong)
+    var isVolumeSliderVisible by remember { mutableStateOf(false) }
+    var volumeInteractionKey by remember { mutableIntStateOf(0) }
+
+    // Tự động ẩn Slider sau 3 giây
+    LaunchedEffect(volumeInteractionKey) {
+        if (isVolumeSliderVisible) {
+            delay(3000)
+            isVolumeSliderVisible = false
+        }
+    }
+
     // Intercept system back gesture/button to call onBackClick instead of exiting the app
     BackHandler {
         onBackClick()
@@ -246,6 +266,59 @@ fun PlayerScreen(
                             modifier = Modifier.size(28.dp)
                         )
                     }
+                }
+            }
+
+            // Thanh tăng giảm âm lượng bên phải màn hình (ẩn/hiện khi long press)
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight(0.3f)
+                    .align(Alignment.CenterEnd)
+                    .width(60.dp) // Vùng nhận diện nhấn giữ rộng hơn một chút cho thoải mái
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onLongPress = {
+                                isVolumeSliderVisible = true
+                                volumeInteractionKey++
+                            }
+                        )
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                AnimatedVisibility(
+                    visible = isVolumeSliderVisible,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    Slider(
+                        value = viewModel.volume,
+                        onValueChange = {
+                            viewModel.updateVolume(it)
+                            volumeInteractionKey++
+                        },
+                        valueRange = 0f..1f,
+                        modifier = Modifier
+                            .rotate(-90f)
+                            .layout { measurable, constraints ->
+                                val placeable = measurable.measure(
+                                    Constraints(
+                                        minWidth = constraints.minHeight,
+                                        maxWidth = constraints.maxHeight,
+                                        minHeight = constraints.minWidth,
+                                        maxHeight = constraints.maxWidth,
+                                    )
+                                )
+                                layout(placeable.height, placeable.width) {
+                                    placeable.place(-((placeable.width - placeable.height) / 2), -((placeable.height - placeable.width) / 2))
+                                }
+                            }
+                            .fillMaxHeight(0.5f),
+                        colors = SliderDefaults.colors(
+                            thumbColor = NeonGreen,
+                            activeTrackColor = NeonGreen,
+                            inactiveTrackColor = Color.Gray.copy(alpha = 0.3f)
+                        )
+                    )
                 }
             }
         }
